@@ -6,10 +6,10 @@ class testeController {
   static async teste(request, response) {
     try {
       let client = await knex("client").first();
-      console.log(client);
-      console.log("teste");
 
-      return response.json({ message: "CHAMA" });
+      console.log(client);
+
+      return response.json({ message: "Api rodando" });
     } catch (error) {
       console.log(error);
     }

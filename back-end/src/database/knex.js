@@ -18,7 +18,7 @@ const knex = require("knex")({
     min: 0,
     max: 2, // deixa baixo pra teste
   },
-  debug: true,
+  // debug: true,
 });
 
 module.exports = knex;
