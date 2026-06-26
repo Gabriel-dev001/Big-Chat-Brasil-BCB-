@@ -9,6 +9,7 @@ app.use(express.json());
 app.use(require("./routes/teste"));
 
 app.use(require("./routes/client"));
+app.use(require("./routes/conversation"));
 
 const PORT = process.env.PORT || 3000;
 
