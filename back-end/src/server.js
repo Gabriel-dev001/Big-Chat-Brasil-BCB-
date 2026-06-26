@@ -10,6 +10,7 @@ app.use(require("./routes/teste"));
 
 app.use(require("./routes/client"));
 app.use(require("./routes/conversation"));
+app.use(require("./routes/message"));
 
 const PORT = process.env.PORT || 3000;
 
