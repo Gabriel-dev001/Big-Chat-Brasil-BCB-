@@ -1,52 +1,36 @@
 const knex = require("../database/knex");
 
 class ClientRepository {
-  static async getByDocument(documentId) {
-    try {
-      return knex("client").where({ documentId }).first();
-    } catch (error) {
-      console.log(error);
-    }
+  static async getByDocument(document_id) {
+    return knex("client").where({ document_id }).first();
   }
 
   static async getAll() {
-    try {
-      return knex("client").select();
-    } catch (error) {
-      console.log(error);
-    }
+    return knex("client").select();
   }
 
   static async getById(id) {
-    try {
-      return knex("client").where({ id }).first();
-    } catch (error) {
-      console.log(error);
-    }
+    return knex("client").where({ id }).first();
   }
 
   static async getBalance(id) {
-    try {
-      return knex("client").where({ id }).first("planType", "balance", "limit");
-    } catch (error) {
-      console.log(error);
-    }
+    return knex("client").where({ id }).first("planType", "balance", "limit");
   }
 
   static async create(data) {
-    try {
-      return knex("client").insert(data);
-    } catch (error) {
-      console.log(error);
-    }
+    return knex("client").insert(data);
   }
 
   static async update(id, data) {
-    try {
-      return knex("client").where({ id }).update(data);
-    } catch (error) {
-      console.log(error);
-    }
+    return knex("client").where({ id }).update(data);
+  }
+
+  static async incrementBalence(id, message_cost) {
+    return knex("client").where({ id }).increment("balance", message_cost);
+  }
+
+  static async decrementBalence(id, message_cost) {
+    return knex("client").where({ id }).decrement("balance", message_cost);
   }
 }
 

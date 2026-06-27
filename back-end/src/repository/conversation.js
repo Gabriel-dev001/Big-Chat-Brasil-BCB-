@@ -2,19 +2,15 @@ const knex = require("../database/knex");
 
 class ConversationRepository {
   static async getAll(client_id) {
-    try {
-      return knex("conversation").where({ client_id }).select();
-    } catch (error) {
-      console.log(error);
-    }
+    return knex("conversation").where({ client_id }).select();
   }
 
   static async getById(id) {
-    try {
-      return knex("conversation").where({ id }).first();
-    } catch (error) {
-      console.log(error);
-    }
+    return knex("conversation").where({ id }).first();
+  }
+
+  static async getByClientRecipient(client_id, recepient_id) {
+    return knex("conversation").where({ client_id, recepient_id }).first();
   }
 }
 
