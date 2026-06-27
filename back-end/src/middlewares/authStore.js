@@ -1,5 +1,5 @@
 const authStore = {
-  document_id: null,
+  tokens: new Set(),
 };
 
 module.exports = authStore;

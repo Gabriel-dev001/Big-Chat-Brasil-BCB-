@@ -10,7 +10,7 @@ class ClientController {
       const result = await clientService.auth(document_id, document_type);
 
       if (result.login && result.exists && result.token) {
-        authStore.document_id = result.token;
+        authStore.tokens.add(result.token);
       }
 
       return response.status(200).json(result);

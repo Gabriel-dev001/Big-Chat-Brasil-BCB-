@@ -10,14 +10,7 @@ module.exports = (request, response, next) => {
     });
   }
 
-  if (!authStore.document_id) {
-    return response.status(403).json({
-      error: true,
-      message: "Token inválido - usuário autenticado",
-    });
-  }
-
-  if (documentIdHeader != authStore.document_id) {
+  if (!authStore.tokens.has(documentIdHeader)) {
     return response.status(403).json({
       error: true,
       message: "Token inválido",
