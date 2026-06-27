@@ -74,7 +74,7 @@ class ClientService {
     return { error: false, client_balance };
   }
 
-  static async create(name, document_id, document_type, planType) {
+  static async create(name, document_id, document_type, plan_type) {
     if (!name) {
       return { error: true, message: "Informe o nome" };
     }
@@ -85,11 +85,11 @@ class ClientService {
 
     document_id = document_id.replace(/\D/g, "");
 
-    if (!planType) {
+    if (!plan_type) {
       return { error: true, message: "Informe o plano" };
     }
 
-    if (planType != "prepaid" && planType != "postpaid") {
+    if (plan_type != "prepaid" && plan_type != "postpaid") {
       return { error: true, message: "Plano inválido" };
     }
 
@@ -110,13 +110,13 @@ class ClientService {
     let balance = 0;
     let limit = 0;
 
-    if (planType == "prepaid") {
+    if (plan_type == "prepaid") {
       balance = 10.0;
     } else {
       limit = 10.0;
     }
 
-    let data = { name, document_id, document_type, planType, balance, limit };
+    let data = { name, document_id, document_type, plan_type, balance, limit };
 
     const [client_id] = await clientRepository.create(data);
 

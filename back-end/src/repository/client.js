@@ -14,7 +14,7 @@ class ClientRepository {
   }
 
   static async getBalance(id) {
-    return knex("client").where({ id }).first("planType", "balance", "limit");
+    return knex("client").where({ id }).first("plan_type", "balance", "limit");
   }
 
   static async create(data) {
