@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 
 const startQueueWorker = require("./worker/queue.worker");
+const knex = require("./database/knex");
 
 const app = express();
 
@@ -16,6 +17,22 @@ app.use(require("./routes/queue"));
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  startQueueWorker();
-});
+async function start() {
+  try {
+    await knex.migrate.latest();
+    await knex.seed.run();
+
+    console.log("✅ Migrations executadas.");
+
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
+
+      startQueueWorker();
+    });
+  } catch (error) {
+    console.error("Erro ao executar migrations:", error);
+    process.exit(1);
+  }
+}
+
+start();

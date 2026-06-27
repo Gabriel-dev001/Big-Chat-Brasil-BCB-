@@ -1,3 +1,5 @@
+const path = require("path");
+
 const knex = require("knex")({
   client: "mysql2",
   connection: {
@@ -9,9 +11,14 @@ const knex = require("knex")({
   },
   pool: {
     min: 0,
-    max: 2, // deixa baixo pra teste
+    max: 5,
   },
-  // debug: true,
+  migrations: {
+    directory: path.join(__dirname, "migrations"),
+  },
+  seeds: {
+    directory: path.join(__dirname, "seeds"),
+  },
 });
 
 module.exports = knex;
