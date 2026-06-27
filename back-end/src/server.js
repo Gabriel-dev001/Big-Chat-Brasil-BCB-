@@ -22,15 +22,10 @@ async function start() {
     await knex.migrate.latest();
     await knex.seed.run();
 
-    console.log("✅ Migrations executadas.");
-
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Servidor rodando na porta ${PORT}`);
-
       startQueueWorker();
     });
   } catch (error) {
-    console.error("Erro ao executar migrations:", error);
     process.exit(1);
   }
 }
