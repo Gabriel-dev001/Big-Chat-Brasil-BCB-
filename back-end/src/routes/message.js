@@ -4,7 +4,7 @@ const routes = express.Router();
 
 const validate = require("../middlewares/validate");
 
-const messageController = require("../controllers/messsage");
+const messageController = require("../controllers/message");
 
 routes.get("/messages/:client_id", validate, messageController.getAll);
 routes.get("/message/:id", validate, messageController.getById);
