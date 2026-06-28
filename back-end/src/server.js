@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv/config");
 const express = require("express");
 const cors = require("cors");
 
@@ -17,7 +17,7 @@ app.use(require("./routes/queue"));
 
 const PORT = process.env.PORT || 3000;
 
-async function start() {
+async function start(retries = 10) {
   try {
     await knex.migrate.latest();
     await knex.seed.run();
@@ -26,7 +26,12 @@ async function start() {
       startQueueWorker();
     });
   } catch (error) {
-    process.exit(1);
+    console.error(error.message);
+    if (retries > 0) {
+      setTimeout(() => start(retries - 1), 3000);
+    } else {
+      process.exit(1);
+    }
   }
 }
 
