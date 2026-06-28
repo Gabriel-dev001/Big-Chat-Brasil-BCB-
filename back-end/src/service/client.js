@@ -6,12 +6,12 @@ class ClientService {
       return {
         login: false,
         exists: false,
-        message: "Cliente não encontrado",
+        message: "Informe o documento",
       };
     }
 
     if (document_type != "cpf" && document_type != "cnpj") {
-      return { login: false, exists: false, message: "Tipo inválido" };
+      return { login: false, exists: false, message: "Tipo documento inválido" };
     }
 
     document_id = document_id.replace(/\D/g, "");
@@ -29,7 +29,7 @@ class ClientService {
     const client = await clientRepository.getByDocument(document_id);
 
     if (!client) {
-      return { login: true, exists: false, message: "Cliente não existe" };
+      return { login: true, exists: false, message: "Registrar-se" };
     }
 
     return {
@@ -90,7 +90,7 @@ class ClientService {
     }
 
     if (plan_type != "prepaid" && plan_type != "postpaid") {
-      return { error: true, message: "Plano inválido" };
+      return { error: true, message: "Tipo plano inválido" };
     }
 
     if (!document_type) {

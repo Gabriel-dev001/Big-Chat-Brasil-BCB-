@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { authClient, createClient } from "../../services/client/api";
 import MessageError from "../../components/MessageError";
+import MessageWarning from "../../components/MessageWarning";
 import { useAuth } from "../../auth/authContext";
 import { useNavigate } from "react-router-dom";
 import "./style.css";
@@ -15,6 +16,7 @@ const Login = ({ onLogin }) => {
   const [name, setName] = useState("");
   const [planType, setPlanType] = useState("prepaid");
   const [messageError, setMessageError] = useState(null);
+  const [messageWarning, setMessageWarning] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleAuth = async () => {
@@ -30,6 +32,11 @@ const Login = ({ onLogin }) => {
           navigate("/dashboard");
         } else {
           setNotFound(true);
+          if (data.message == "Registrar-se") {
+            setMessageWarning(data.message);
+          } else {
+            setMessageError(data.message);
+          }
         }
       } else {
         setMessageError(data.message);
@@ -42,11 +49,14 @@ const Login = ({ onLogin }) => {
   };
 
   const handleCreate = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
+
+      const cleanDocument = documentId.replace(/\D/g, "");
+
       const { data } = await createClient({
         name,
-        document_id: documentId,
+        document_id: cleanDocument,
         document_type: documentType,
         plan_type: planType,
       });
@@ -59,6 +69,25 @@ const Login = ({ onLogin }) => {
     }
   };
 
+  const formatDocument = (value, type) => {
+    const numbers = value.replace(/\D/g, "");
+
+    if (type == "cpf") {
+      return numbers
+        .slice(0, 11)
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    } else {
+      return numbers
+        .slice(0, 14)
+        .replace(/^(\d{2})(\d)/, "$1.$2")
+        .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1/$2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="login-card">
@@ -68,13 +97,18 @@ const Login = ({ onLogin }) => {
           <div className="form">
             <input
               value={documentId}
-              onChange={(e) => setDocumentId(e.target.value)}
-              placeholder="CPF ou CNPJ"
+              onChange={(e) =>
+                setDocumentId(formatDocument(e.target.value, documentType))
+              }
+              placeholder={documentType == "cpf" ? "CPF" : "CNPJ"}
             />
 
             <select
               value={documentType}
-              onChange={(e) => setDocumentType(e.target.value)}
+              onChange={(e) => {
+                setDocumentType(e.target.value);
+                setDocumentId("");
+              }}
             >
               <option value="cpf">CPF</option>
               <option value="cnpj">CNPJ</option>
@@ -111,6 +145,7 @@ const Login = ({ onLogin }) => {
         )}
 
         {messageError ? <MessageError message={messageError} /> : ""}
+        {messageWarning ? <MessageWarning message={messageWarning} /> : ""}
       </div>
     </div>
   );
