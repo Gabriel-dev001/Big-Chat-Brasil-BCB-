@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../auth/authContext";
 import { updateClient } from "../services/client/api";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 export const PlanModal = ({ isOpen, onClose }) => {
   const { client, login } = useAuth();
@@ -32,8 +33,8 @@ export const PlanModal = ({ isOpen, onClose }) => {
     }).format(value);
   };
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
+  return createPortal(
+    <>
       <style>{`
       .modal-overlay {
         position: fixed;
@@ -58,7 +59,6 @@ export const PlanModal = ({ isOpen, onClose }) => {
         display: flex;
         flex-direction: column;
         gap: 20px;
-        margin-top:600px;
       }
       .modal-card h2 {
         font-size: 20px;
@@ -134,43 +134,55 @@ export const PlanModal = ({ isOpen, onClose }) => {
         border-color: rgba(255, 255, 255, 0.4);
       }
     `}</style>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+          <h2>Plano</h2>
 
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <h2>Plano do Cliente</h2>
+          <div className="modal-plan-list">
+            <div className="modal-info-group">
+              <label>Tipo de Plano</label>
+              <span
+                className={`plan-badge ${client?.plan_type === "prepaid" ? "prepaid" : "postpaid"}`}
+              >
+                {client?.plan_type == "prepaid" ? "Pré-pago" : "Pós-pago"}
+              </span>
+            </div>
 
-        <div className="modal-plan-list">
-          <div className="modal-info-group">
-            <label>Tipo de Plano</label>
-            <span
-              className={`plan-badge ${client?.plan_type === "prepaid" ? "prepaid" : "postpaid"}`}
+            <div className="modal-info-group">
+              {client?.plan_type == "prepaid" ? (
+                <label>Saldo Atual</label>
+              ) : (
+                <label>Saldo utilizado</label>
+              )}
+              <span className="plan-value" style={{ color: "#4caf50" }}>
+                {formatCurrency(client?.balance)}
+              </span>
+            </div>
+
+            {client?.plan_type == "postpaid" ? (
+              <div className="modal-info-group">
+                {<label>Limite</label>}
+                <span className="plan-value">
+                  {formatCurrency(client?.limit)}
+                </span>
+              </div>
+            ) : (
+              ""
+            )}
+          </div>
+
+          <div className="modal-actions">
+            <button
+              className="btn-modal-close"
+              onClick={onClose}
+              disabled={loading}
             >
-              {client?.plan_type === "prepaid" ? "Pré-pago" : "Pós-pago"}
-            </span>
+              Fechar
+            </button>
           </div>
-
-          <div className="modal-info-group">
-            <label>Saldo Atual</label>
-            <span className="plan-value" style={{ color: "#4caf50" }}>
-              {formatCurrency(client?.balance)}
-            </span>
-          </div>
-
-          <div className="modal-info-group">
-            <label>Limite de Crédito</label>
-            <span className="plan-value">{formatCurrency(client?.limit)}</span>
-          </div>
-        </div>
-
-        <div className="modal-actions">
-          <button
-            className="btn-modal-close"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Fechar
-          </button>
         </div>
       </div>
-    </div>
+    </>,
+    document.body,
   );
 };

@@ -3,6 +3,7 @@ import MessageError from "./MessageError";
 import { useAuth } from "../auth/authContext";
 import { updateClient } from "../services/client/api";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 export const ClientModal = ({ isOpen, onClose }) => {
   const { client, login } = useAuth();
@@ -54,8 +55,8 @@ export const ClientModal = ({ isOpen, onClose }) => {
     }
   };
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
+  return createPortal(
+    <>
       <style>{`
         .modal-overlay {
             position: fixed;
@@ -74,13 +75,12 @@ export const ClientModal = ({ isOpen, onClose }) => {
             width: 400px;
             padding: 28px;
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.06);
+            background: #111827;
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 0 0 40px rgba(65, 105, 225, 0.2);
             display: flex;
             flex-direction: column;
             gap: 16px;
-            margin-top:600px;
         }
         .modal-card h2 {
             font-size: 20px;
@@ -151,19 +151,20 @@ export const ClientModal = ({ isOpen, onClose }) => {
         }
       `}</style>
 
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <h2>Perfil do Cliente</h2>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+          <h2>Perfil do Cliente</h2>
 
-        <div className="modal-info-group">
-          <label>Nome do Cliente</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+          <div className="modal-info-group">
+            <label>Nome do Cliente</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-        {/* <div className="modal-info-group">
+          {/* <div className="modal-info-group">
           <label>Documento do Cliente</label>
           <input
             type="text"
@@ -184,25 +185,27 @@ export const ClientModal = ({ isOpen, onClose }) => {
           </select>
         </div> */}
 
-        <div className="modal-actions">
-          <button
-            className="btn-modal-close"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Fechar
-          </button>
-          <button
-            className="btn-modal-save"
-            onClick={handleSave}
-            disabled={loading}
-          >
-            {loading ? "Salvando..." : "Salvar"}
-          </button>
-        </div>
+          <div className="modal-actions">
+            <button
+              className="btn-modal-close"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Fechar
+            </button>
+            <button
+              className="btn-modal-save"
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "Salvando..." : "Salvar"}
+            </button>
+          </div>
 
-        {messageError ? <MessageError message={messageError} /> : ""}
+          {messageError ? <MessageError message={messageError} /> : ""}
+        </div>
       </div>
-    </div>
+    </>,
+    document.body,
   );
 };

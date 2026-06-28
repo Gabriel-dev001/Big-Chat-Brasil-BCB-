@@ -129,8 +129,10 @@ export const Header = () => {
           onClick={() => setIsModalPlanOpen(true)}
           title="Ver Plano"
         >
-          {client?.planType === "prepaid" ? "Saldo" : "Limite"}:{" "}
-          {formatCurrency(client?.balance ?? client?.limit)}
+          {client?.plan_type == "prepaid" ? "Saldo Restante" : "Limite"}:{" "}
+          {formatCurrency(
+            client?.plan_type === "prepaid" ? client?.balance : client?.limit,
+          )}{" "}
         </button>
 
         <button className="btn-logout" onClick={() => navigate("/")}>
