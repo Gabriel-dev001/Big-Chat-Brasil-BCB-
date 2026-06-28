@@ -2,6 +2,7 @@ const queueService = require("./queue");
 
 const messageRepository = require("../repository/message");
 const clientRepository = require("../repository/client");
+const conversationRepository = require("../repository/conversation");
 
 class MessageService {
   static async getAll(client_id, content) {
@@ -88,6 +89,8 @@ class MessageService {
     const message = await messageRepository.getById(message_id);
 
     queueService.enqueue(message);
+
+    conversationRepository.updateLastMessage(message.conversation_id, message.content);
 
     return { error: false, message };
   }
