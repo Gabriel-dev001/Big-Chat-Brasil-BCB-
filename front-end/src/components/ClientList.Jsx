@@ -109,7 +109,7 @@ export const ClientList = ({ onChatClose }) => {
       <h2 className="list-title">Clientes</h2>
 
       {loading ? (
-        <p className="loading-text">Carregando listagem...</p>
+        <p className="loading-text">Carregando listagem</p>
       ) : (
         <div className="grid-clients">
           {clients
