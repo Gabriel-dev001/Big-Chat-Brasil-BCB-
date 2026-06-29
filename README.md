@@ -78,9 +78,6 @@ cd Big-Chat-Brasil-BCB-
 ### 2. Suba os containers
 
 ```bash
-docker-compose up
------
-docker-compose down
 docker-compose up --build
 ```
 
@@ -95,7 +92,7 @@ docker-compose up --build
 
 ---
 
-## 🔑 Dados para Teste (Seeds)
+## Dados para Teste (Seeds)
 
 Dois clientes são criados automaticamente pelos seeds:
 
@@ -141,7 +138,7 @@ Dois clientes são criados automaticamente pelos seeds:
 
 ---
 
-## ✨ Diferenciais Implementados
+## Diferenciais Implementados
 
 - **Fila com prioridade** (normal/urgente) processada por worker assíncrono
 - **Prevenção de starvation** — garante que mensagens normais não fiquem presas indefinidamente
