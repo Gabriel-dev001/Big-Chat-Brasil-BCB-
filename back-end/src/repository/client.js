@@ -25,11 +25,11 @@ class ClientRepository {
     return knex("client").where({ id }).update(data);
   }
 
-  static async incrementBalence(id, message_cost) {
+  static async incrementBalance(id, message_cost) {
     return knex("client").where({ id }).increment("balance", message_cost);
   }
 
-  static async decrementBalence(id, message_cost) {
+  static async decrementBalance(id, message_cost) {
     return knex("client").where({ id }).decrement("balance", message_cost);
   }
 }

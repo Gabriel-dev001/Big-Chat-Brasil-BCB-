@@ -164,27 +164,6 @@ export const ClientModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {/* <div className="modal-info-group">
-          <label>Documento do Cliente</label>
-          <input
-            type="text"
-            value={documentId}
-            onChange={(e) => setDocumentId(e.target.value)}
-          />
-        </div>
-
-        <div className="modal-info-group">
-          <label>Tipo Documento</label>
-          <select
-            value={documentType}
-            onChange={(e) => setPlanType(e.target.value)}
-            className="modal-select"
-          >
-            <option value="cpf">CPF</option>
-            <option value="postpaid">CNPJ</option>
-          </select>
-        </div> */}
-
           <div className="modal-actions">
             <button
               className="btn-modal-close"

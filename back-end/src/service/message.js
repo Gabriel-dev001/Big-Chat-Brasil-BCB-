@@ -69,16 +69,16 @@ class MessageService {
     let cost = priority == "normal" ? 0.25 : 0.5;
 
     if (client.plan_type == "prepaid") {
-      if (client.balance == 0.0) {
+      if (client.balance - cost < 0) {
         return { error: true, message: "Saldo insuficiente" };
       } else {
-        await clientRepository.decrementBalence(client.id, cost);
+        await clientRepository.decrementBalance(client.id, cost);
       }
     } else {
-      if (client.balance == client.limit) {
+      if (client.balance + cost > client.limit) {
         return { error: true, message: "Saldo insuficiente" };
       } else {
-        await clientRepository.incrementBalence(client.id, cost);
+        await clientRepository.incrementBalance(client.id, cost);
       }
     }
 
