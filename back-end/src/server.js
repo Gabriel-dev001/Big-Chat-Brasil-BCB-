@@ -1,11 +1,31 @@
 require("dotenv/config");
 const express = require("express");
 const cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const startQueueWorker = require("./worker/queue.worker");
 const knex = require("./database/knex");
 
 const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: { origin: "*" },
+});
+
+// Disponibiliza o io para o resto da aplicação
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  socket.on("join-conversation", (conversation_id) => {
+    socket.join(`conversation:${conversation_id}`);
+  });
+
+  socket.on("leave-conversation", (conversation_id) => {
+    socket.leave(`conversation:${conversation_id}`);
+  });
+});
 
 app.use(cors());
 app.use(express.json());
@@ -22,8 +42,8 @@ async function start(retries = 10) {
     await knex.migrate.latest();
     await knex.seed.run();
 
-    app.listen(PORT, "0.0.0.0", () => {
-      startQueueWorker();
+    server.listen(PORT, "0.0.0.0", () => {
+      startQueueWorker(io);
     });
   } catch (error) {
     console.error(error.message);
@@ -36,3 +56,5 @@ async function start(retries = 10) {
 }
 
 start();
+
+module.exports = { app, io };

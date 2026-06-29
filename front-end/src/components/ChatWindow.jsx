@@ -6,7 +6,6 @@ import {
   markMessagesRead,
 } from "../services/message/api";
 import { useAuth } from "../auth/authContext";
-import { io } from "socket.io-client";
 
 export const ChatWindow = ({ recipient, onClose }) => {
   const [conversation, setConversation] = useState(null);
@@ -21,12 +20,10 @@ export const ChatWindow = ({ recipient, onClose }) => {
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
+  const conversationRef = useRef(null);
 
   useEffect(() => {
     if (!recipient) return;
-
-    const socket = io("http://localhost:3000");
-    let convId = null;
 
     const init = async () => {
       setLoadingConv(true);
@@ -43,22 +40,8 @@ export const ChatWindow = ({ recipient, onClose }) => {
         }
 
         const conversation = data.conversation;
-        convId = conversation.id;
+        conversationRef.current = conversation;
         setConversation(conversation);
-
-        socket.emit("join-conversation", conversation.id);
-
-        socket.on("message-delivered", (msg) => {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m._optimistic &&
-              m.conversation_id == msg.conversation_id &&
-              m.content === msg.content
-                ? { ...msg }
-                : m,
-            ),
-          );
-        });
 
         const { data: msgData } = await getMessagesByConversation(
           conversation.id,
@@ -92,9 +75,26 @@ export const ChatWindow = ({ recipient, onClose }) => {
 
     init();
 
+    const interval = setInterval(async () => {
+      if (!conversationRef.current) return;
+      try {
+        const { data: msgData } = await getMessagesByConversation(
+          conversationRef.current.id,
+        );
+
+        if (!msgData?.error && msgData?.messages) {
+          const visible = msgData.messages.filter(
+            (m) => m.status == "delivered" || m.status == "read",
+          );
+          setMessages(visible);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, 2000);
+
     return () => {
-      if (convId) socket.emit("leave-conversation", convId);
-      socket.disconnect();
+      clearInterval(interval);
     };
   }, [recipient]);
 
@@ -325,7 +325,6 @@ export const ChatWindow = ({ recipient, onClose }) => {
           border-radius: 14px;
           font-size: 13px;
           line-height: 1.45;
-
           white-space: pre-wrap;
           overflow-wrap: break-word;
           word-break: normal;

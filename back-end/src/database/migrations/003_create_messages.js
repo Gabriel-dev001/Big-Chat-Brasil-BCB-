@@ -18,7 +18,7 @@ exports.up = async function (knex) {
 
     table.longText("content").notNullable();
 
-    table.dateTime("datetime").notNullable();
+    table.dateTime("datetime").notNullable().defaultTo(knex.fn.now());
 
     table.string("priority", 45).notNullable().defaultTo("normal");
 
