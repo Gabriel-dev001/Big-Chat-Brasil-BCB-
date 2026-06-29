@@ -1,15 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../auth/authContext";
 import { ClientModal } from "./ClientModal";
 import { PlanModal } from "./PlanModal";
 import { useNavigate } from "react-router-dom";
+import { getClient } from "../services/client/api";
 
-export const Header = () => {
+export const Header = ({ refresh }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalPlanOpen, setIsModalPlanOpen] = useState(false);
+  const [clientData, setClientData] = useState(null);
   const { client, logout } = useAuth();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!client?.id) return;
+
+    const fetchClient = async () => {
+      try {
+        const { data } = await getClient(client.id);
+
+        if (data && !data.error) {
+          setClientData(data.client);
+        } else {
+          setClientData(null);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchClient();
+  }, [client?.id, refresh]);
+
+  const displayClient = clientData;
 
   const formatCurrency = (value) => {
     if (value == undefined || value == null) {
@@ -53,7 +77,7 @@ export const Header = () => {
           transition: color 0.2s ease;
         }
         .menu-hamburger:hover {
-          color: #4169e1; /* Cor primária no hover */
+          color: #4169e1;
         }
         .header-title {
           font-size: 18px;
@@ -67,7 +91,7 @@ export const Header = () => {
           gap: 18px;
         }
         .balance-badge {
-          background: rgba(65, 105, 225, 0.15); /* Azul Royal com opacidade */
+          background: rgba(65, 105, 225, 0.15);
           border: 1px solid rgba(65, 105, 225, 0.3);
           color: #ffffff;
           padding: 6px 14px;
@@ -144,25 +168,22 @@ export const Header = () => {
         >
           Usuário
         </button>
-        <h1 className="header-title">{client?.name || "Carregando..."}</h1>
+        <h1 className="header-title">
+          {displayClient?.name || "Carregando..."}
+        </h1>
       </div>
 
       <div className="header-right">
-        {/* <button onClick={() => setIsModalPlanOpen(true)} title="Ver Plano">
-          <span className="balance-badge">
-            {client?.planType == "prepaid" ? "Saldo" : "Limite"}:{" "}
-            {formatCurrency(client?.balance ?? client?.limit)}
-          </span>
-        </button> */}
-
         <button
           className="balance-badge"
           onClick={() => setIsModalPlanOpen(true)}
           title="Ver Plano"
         >
-          {client?.plan_type == "prepaid" ? "Saldo Restante" : "Limite"}:{" "}
+          {displayClient?.plan_type == "prepaid" ? "Saldo Restante" : "Limite"}:{" "}
           {formatCurrency(
-            client?.plan_type == "prepaid" ? client?.balance : client?.limit,
+            displayClient?.plan_type == "prepaid"
+              ? displayClient?.balance
+              : displayClient?.limit,
           )}{" "}
         </button>
 

@@ -13,7 +13,7 @@ export const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <Header />
+      <Header refresh={refresh} />
 
       <div className="dashboard-content">
         <div className="status-actions">
