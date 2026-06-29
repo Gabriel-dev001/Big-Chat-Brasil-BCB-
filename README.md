@@ -1,10 +1,10 @@
-# 💬 Big Chat Brasil (BCB)
+# Big Chat Brasil (BCB)
 
 Plataforma de troca de mensagens com suporte a planos **pré-pago** e **pós-pago**, fila de prioridade com prevenção de starvation e dashboard em tempo real.
 
 ---
 
-## 📋 Premissas Assumidas
+## Premissas Assumidas
 
 - Cada cliente é identificado por **CPF ou CNPJ** (usado como token de autenticação via header `x-document-id`)
 - Clientes **pré-pagos** começam com saldo de **R$ 10,00** e têm o envio bloqueado ao zerar o saldo
@@ -14,7 +14,7 @@ Plataforma de troca de mensagens com suporte a planos **pré-pago** e **pós-pag
 - O processamento das mensagens é **assíncrono via worker** com simulação de envio (1 segundo por mensagem)
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 ### Backend
 - **Node.js** com **Express**
@@ -31,7 +31,7 @@ Plataforma de troca de mensagens com suporte a planos **pré-pago** e **pós-pag
 
 ---
 
-## 🗂️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 bcb/
@@ -79,6 +79,9 @@ cd Big-Chat-Brasil-BCB-
 
 ```bash
 docker-compose up
+-----
+docker-compose down
+docker-compose up --build
 ```
 
 > Aguarde os serviços de backend, frontend e banco de dados subirem completamente.
@@ -99,8 +102,8 @@ Dois clientes são criados automaticamente pelos seeds:
 | Nome    | CPF           | Plano     | Saldo/Limite |
 |---------|---------------|-----------|--------------|
 | Gabriel | 111.111.111-11 | Pré-pago  | R$ 10,00     |
-| Luiz    | 222.222.222-22 | Pós-pago  | Limite R$ 10,00 |
-
+| Irrah Tech| 22.222.222/2222-22 | Pós-pago  | Limite R$ 10,00 |
+    
 ---
 
 ## 📡 Endpoints da API
@@ -143,8 +146,6 @@ Dois clientes são criados automaticamente pelos seeds:
 - **Fila com prioridade** (normal/urgente) processada por worker assíncrono
 - **Prevenção de starvation** — garante que mensagens normais não fiquem presas indefinidamente
 - **Dashboard de status** da fila em tempo real (queued, processing, delivered, read, failed)
-- **Mensagens em tempo real via WebSocket** — utiliza Socket.io para atualização instantânea do chat sem polling, o servidor emite o evento `new_message` para a conversa assim que a mensagem é salva
-
 - **Autenticação stateless** via header `x-document-id` com token baseado no documento do cliente
 - **Arquitetura em 4 camadas** (routes → controllers → services → repositories)
 - **Migrations e seeds** versionadas com Knex
