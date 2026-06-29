@@ -90,7 +90,7 @@ class MessageService {
 
     queueService.enqueue(message);
 
-    conversationRepository.updateLastMessage(message.conversation_id, message.content);
+    conversationRepository.updateMessage(message.conversation_id, message.content);
 
     return { error: false, message };
   }

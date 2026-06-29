@@ -21,11 +21,12 @@ class ConversationRepository {
     return knex("conversation").where({ id }).first();
   }
 
-  static async updateLastMessage(id, last_message) {
+  static async updateMessage(id, last_message) {
     return knex("conversation")
       .where({ id })
       .update({
         last_message,
+        last_message_time: knex.raw("CURRENT_TIMESTAMP"),
         unread_count: knex.raw("unread_count + 1"),
       });
   }

@@ -171,7 +171,17 @@ export const ConversationList = ({ refresh = 0, onChatClose }) => {
                     </div>
 
                     <div className="conversation-time">
-                      {conversation.last_message_time || "--"}
+                      {conversation.last_message_time
+                        ? new Date(
+                            conversation.last_message_time,
+                          ).toLocaleString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "--"}{" "}
                     </div>
                   </div>
 
