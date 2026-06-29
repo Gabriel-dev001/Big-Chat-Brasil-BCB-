@@ -4,7 +4,7 @@ import { getConversations } from "../services/message/api";
 import MessageError from "./MessageError";
 import { ChatWindow } from "./ChatWindow";
 
-export const ConversationList = () => {
+export const ConversationList = ({ refresh = 0, onChatClose }) => {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [messageError, setMessageError] = useState(null);
@@ -12,7 +12,22 @@ export const ConversationList = () => {
 
   const { client } = useAuth();
 
+  const getRecipient = (conversation) => {
+    if (conversation.client_id == client.id) {
+      return {
+        id: conversation.recipient_id,
+        name: conversation.recipient_name,
+      };
+    } else {
+      return { id: conversation.client_id, name: conversation.client_name };
+    }
+  };
+
   useEffect(() => {
+    if (!client?.id) return;
+
+    setLoading(true);
+
     const fetchConversations = async () => {
       try {
         const { data } = await getConversations(client.id);
@@ -30,10 +45,8 @@ export const ConversationList = () => {
       }
     };
 
-    if (client?.id) {
-      fetchConversations();
-    }
-  }, [client]);
+    fetchConversations();
+  }, [client, refresh]);
 
   return (
     <div className="conversation-list-container">
@@ -136,47 +149,47 @@ export const ConversationList = () => {
         <div className="conversation-grid">
           {conversations
             .filter((conversation) => conversation.last_message !== null)
-            .map((conversation) => (
-              <div
-                key={conversation.id}
-                className={`conversation-card ${
-                  activeConversation?.id == conversation.id ? "active" : ""
-                }`}
-                onClick={() =>
-                  setActiveConversation(
-                    activeConversation?.id == conversation.id
-                      ? null
-                      : conversation,
-                  )
-                }
-              >
-                <div className="conversation-header">
-                  <div
-                    className="conversation-name"
-                    title={conversation.recipient_name}
-                  >
-                    {conversation.recipient_name}
-                  </div>
-
-                  <div className="conversation-time">
-                    {conversation.last_message_time || "--"}
-                  </div>
-                </div>
-
+            .map((conversation) => {
+              const other = getRecipient(conversation);
+              return (
                 <div
-                  className="conversation-message"
-                  title={conversation.last_message}
+                  key={conversation.id}
+                  className={`conversation-card ${
+                    activeConversation?.id == conversation.id ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    setActiveConversation(
+                      activeConversation?.id == conversation.id
+                        ? null
+                        : conversation,
+                    )
+                  }
                 >
-                  {conversation.last_message || "Nenhuma mensagem"}
-                </div>
+                  <div className="conversation-header">
+                    <div className="conversation-name" title={other.name}>
+                      {other.name}
+                    </div>
 
-                <div className="conversation-footer">
-                  {conversation.unread_count > 0 && (
-                    <div className="conversation-badge"></div>
-                  )}
+                    <div className="conversation-time">
+                      {conversation.last_message_time || "--"}
+                    </div>
+                  </div>
+
+                  <div
+                    className="conversation-message"
+                    title={conversation.last_message}
+                  >
+                    {conversation.last_message || "Nenhuma mensagem"}
+                  </div>
+
+                  <div className="conversation-footer">
+                    {conversation.unread_count > 0 && (
+                      <div className="conversation-badge"></div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
       )}
 
@@ -184,11 +197,11 @@ export const ConversationList = () => {
 
       {activeConversation && (
         <ChatWindow
-          recipient={{
-            id: activeConversation.recipient_id,
-            name: activeConversation.recipient_name,
+          recipient={getRecipient(activeConversation)}
+          onClose={() => {
+            setActiveConversation(null);
+            onChatClose?.();
           }}
-          onClose={() => setActiveConversation(null)}
         />
       )}
     </div>

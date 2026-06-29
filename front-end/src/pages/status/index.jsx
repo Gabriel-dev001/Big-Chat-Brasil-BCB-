@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import "./style.css";
 
 export const Status = () => {
-  const navigate = useNavigate();
-
   const [status, setStatus] = useState({});
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchQueueStatus = async () => {

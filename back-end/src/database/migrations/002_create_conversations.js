@@ -10,6 +10,8 @@ exports.up = async function (knex) {
 
     table.string("recipient_name", 255).notNullable();
 
+    table.string("client_name", 255).notNullable();
+
     table.longtext("last_message").defaultTo(null);
 
     table.dateTime("last_message_time").defaultTo(null);

@@ -6,6 +6,7 @@ import {
   markMessagesRead,
 } from "../services/message/api";
 import { useAuth } from "../auth/authContext";
+import { io } from "socket.io-client";
 
 export const ChatWindow = ({ recipient, onClose }) => {
   const [conversation, setConversation] = useState(null);
@@ -22,9 +23,10 @@ export const ChatWindow = ({ recipient, onClose }) => {
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    if (!recipient) {
-      return;
-    }
+    if (!recipient) return;
+
+    const socket = io("http://localhost:3000");
+    let convId = null;
 
     const init = async () => {
       setLoadingConv(true);
@@ -41,7 +43,22 @@ export const ChatWindow = ({ recipient, onClose }) => {
         }
 
         const conversation = data.conversation;
+        convId = conversation.id;
         setConversation(conversation);
+
+        socket.emit("join-conversation", conversation.id);
+
+        socket.on("message-delivered", (msg) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m._optimistic &&
+              m.conversation_id == msg.conversation_id &&
+              m.content === msg.content
+                ? { ...msg }
+                : m,
+            ),
+          );
+        });
 
         const { data: msgData } = await getMessagesByConversation(
           conversation.id,
@@ -49,16 +66,13 @@ export const ChatWindow = ({ recipient, onClose }) => {
 
         if (!msgData?.error && msgData?.messages) {
           const visible = msgData.messages.filter(
-            (messsage) =>
-              messsage.status == "delivered" || messsage.status == "read",
+            (m) => m.status == "delivered" || m.status == "read",
           );
 
           setMessages(visible);
 
           const hasUnread = visible.some(
-            (messsage) =>
-              messsage.sender_id == recipient.id &&
-              messsage.status == "delivered",
+            (m) => m.sender_id == recipient.id && m.status == "delivered",
           );
 
           if (hasUnread) {
@@ -77,6 +91,11 @@ export const ChatWindow = ({ recipient, onClose }) => {
     };
 
     init();
+
+    return () => {
+      if (convId) socket.emit("leave-conversation", convId);
+      socket.disconnect();
+    };
   }, [recipient]);
 
   useEffect(() => {

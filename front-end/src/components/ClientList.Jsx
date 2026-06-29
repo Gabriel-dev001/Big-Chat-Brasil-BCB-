@@ -4,7 +4,7 @@ import { getClients } from "../services/client/api";
 import { useAuth } from "../auth/authContext";
 import { ChatWindow } from "./ChatWindow";
 
-export const ClientList = () => {
+export const ClientList = ({ onChatClose }) => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [messageError, setMessageError] = useState(null);
@@ -140,7 +140,10 @@ export const ClientList = () => {
       {activeRecipient && (
         <ChatWindow
           recipient={activeRecipient}
-          onClose={() => setActiveRecipient(null)}
+          onClose={() => {
+            setActiveRecipient(null);
+            onChatClose?.();
+          }}
         />
       )}
     </div>

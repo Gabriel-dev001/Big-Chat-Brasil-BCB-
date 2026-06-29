@@ -36,6 +36,10 @@ class ConversationService {
     conversation = await conversationRepository.getByClientRecipient(client_id, recipient_id);
 
     if (!conversation) {
+      if (client_id == recipient_id) {
+        return { error: true, message: "Conversa já existe" };
+      }
+
       conversation = await ConversationService.create(client_id, recipient_id);
     }
 
@@ -48,12 +52,13 @@ class ConversationService {
     }
 
     const recipient = await clientRepository.getById(recipient_id);
+    const clientData = await clientRepository.getById(client_id);
 
-    if (!recipient) {
+    if (!recipient || !clientData) {
       return { error: true, message: "Recipiente não encontado" };
     }
 
-    const data = { client_id, recipient_id, recipient_name: recipient.name };
+    const data = { client_id, recipient_id, recipient_name: recipient.name, client_name: clientData.name };
 
     return await conversationRepository.create(data);
   }
