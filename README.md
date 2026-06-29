@@ -146,3 +146,9 @@ Dois clientes são criados automaticamente pelos seeds:
 - **Autenticação stateless** via header `x-document-id` com token baseado no documento do cliente
 - **Arquitetura em 4 camadas** (routes → controllers → services → repositories)
 - **Migrations e seeds** versionadas com Knex
+
+## Limitações Conhecidas
+
+- **Tokens de autenticação são armazenados em memória (authStore) - resetam se o servidor reiniciar
+- **A fila de mensagens também é em memória — não persiste entre restarts
+- **Socket.IO implementado no backend, porém ainda não integrado ao frontend; as atualizações de status das mensagens são refletidas na interface por meio de requisições periódicas (polling).
