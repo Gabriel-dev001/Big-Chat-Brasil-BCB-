@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Tempo de geração: 26/06/2026 às 03:57
+-- Tempo de geração: 30/06/2026 às 01:10
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -30,9 +30,9 @@ SET time_zone = "+00:00";
 CREATE TABLE `client` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `documentId` varchar(45) NOT NULL,
-  `documentType` varchar(45) NOT NULL DEFAULT 'cpf',
-  `planType` varchar(45) NOT NULL DEFAULT 'prepaid',
+  `document_id` varchar(45) NOT NULL,
+  `document_type` varchar(45) NOT NULL DEFAULT 'cpf',
+  `plan_type` varchar(45) NOT NULL DEFAULT 'prepaid',
   `balance` decimal(10,2) DEFAULT NULL,
   `limit` decimal(10,2) DEFAULT NULL,
   `active` tinyint(1) NOT NULL DEFAULT 1
@@ -42,9 +42,9 @@ CREATE TABLE `client` (
 -- Despejando dados para a tabela `client`
 --
 
-INSERT INTO `client` (`id`, `name`, `documentId`, `documentType`, `planType`, `balance`, `limit`, `active`) VALUES
-(9, 'Gabriel Rosa', '13979948943', 'cpf', 'prepaid', 10.00, 0.00, 1),
-(10, 'Isabella', '11111114122', 'cpf', 'postpaid', 0.00, 10.00, 1);
+INSERT INTO `client` (`id`, `name`, `document_id`, `document_type`, `plan_type`, `balance`, `limit`, `active`) VALUES
+(9, 'Gabriel Rosa', '11111111111', 'cpf', 'prepaid', 9.50, 0.00, 1),
+(11, 'Irrah Tech', '22222222222222', 'cnpj', 'postpaid', 0.50, 10.00, 1);
 
 -- --------------------------------------------------------
 
@@ -57,17 +57,18 @@ CREATE TABLE `conversation` (
   `client_id` int(11) NOT NULL,
   `recipient_id` int(11) NOT NULL,
   `recipient_name` varchar(255) NOT NULL,
+  `client_name` varchar(255) NOT NULL,
   `last_message` longtext DEFAULT NULL,
   `last_message_time` datetime DEFAULT NULL,
-  `unread_ount` int(11) NOT NULL DEFAULT 0
+  `unread_count` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Despejando dados para a tabela `conversation`
 --
 
-INSERT INTO `conversation` (`id`, `client_id`, `recipient_id`, `recipient_name`, `last_message`, `last_message_time`, `unread_ount`) VALUES
-(1, 9, 10, 'Isabella', 'Oi', '2026-06-25 22:21:36', 1);
+INSERT INTO `conversation` (`id`, `client_id`, `recipient_id`, `recipient_name`, `client_name`, `last_message`, `last_message_time`, `unread_count`) VALUES
+(2, 11, 9, 'Gabriel Rosa', 'Irrah Tech', 'Ola gabriel', NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -86,6 +87,14 @@ CREATE TABLE `message` (
   `status` varchar(45) NOT NULL,
   `cost` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Despejando dados para a tabela `message`
+--
+
+INSERT INTO `message` (`id`, `conversation_id`, `sender_id`, `recipient_id`, `content`, `datetime`, `priority`, `status`, `cost`) VALUES
+(3, 2, 9, 11, 'Olá Irrah', '0000-00-00 00:00:00', 'normal', 'read', 0.25),
+(4, 2, 11, 9, 'Ola gabriel', '0000-00-00 00:00:00', 'normal', 'read', 0.25);
 
 --
 -- Índices para tabelas despejadas
@@ -117,19 +126,19 @@ ALTER TABLE `message`
 -- AUTO_INCREMENT de tabela `client`
 --
 ALTER TABLE `client`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de tabela `conversation`
 --
 ALTER TABLE `conversation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `message`
 --
 ALTER TABLE `message`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
