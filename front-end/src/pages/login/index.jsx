@@ -7,9 +7,6 @@ import { useNavigate } from "react-router-dom";
 import "./style.css";
 
 const Login = ({ onLogin }) => {
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
   const [documentId, setDocumentId] = useState("");
   const [documentType, setDocumentType] = useState("cpf");
   const [notFound, setNotFound] = useState(false);
@@ -18,6 +15,9 @@ const Login = ({ onLogin }) => {
   const [messageError, setMessageError] = useState(null);
   const [messageWarning, setMessageWarning] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleAuth = async () => {
     try {

@@ -28,8 +28,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("client_data");
   };
 
-  // Se ainda estiver carregando o localStorage, não renderiza nada para evitar flash de tela
-  if (loading) return null;
+  if (loading) {
+    return null;
+  }
 
   return (
     <AuthContext.Provider value={{ client, login, logout }}>

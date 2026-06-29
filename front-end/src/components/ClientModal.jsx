@@ -6,14 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 
 export const ClientModal = ({ isOpen, onClose }) => {
-  const { client, login } = useAuth();
-  const navigate = useNavigate();
-
   const [name, setName] = useState("");
   const [documentId, setDocumentId] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [messageError, setMessageError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const { client, login } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (client) {
@@ -59,95 +59,95 @@ export const ClientModal = ({ isOpen, onClose }) => {
     <>
       <style>{`
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(11, 18, 32, 0.8);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(11, 18, 32, 0.8);
+          backdrop-filter: blur(8px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
         }
         .modal-card {
-            width: 400px;
-            padding: 28px;
-            border-radius: 14px;
-            background: #111827;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 0 40px rgba(65, 105, 225, 0.2);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+          width: 400px;
+          padding: 28px;
+          border-radius: 14px;
+          background: #111827;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 0 40px rgba(65, 105, 225, 0.2);
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
         }
         .modal-card h2 {
-            font-size: 20px;
-            margin: 0;
-            color: #e6e6e6;
-            text-align: center;
-            font-family: sans-serif;
+          font-size: 20px;
+          margin: 0;
+          color: #e6e6e6;
+          text-align: center;
+          font-family: sans-serif;
         }
         .modal-info-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-family: sans-serif;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          font-family: sans-serif;
         }
         .modal-info-group label {
-            font-size: 12px;
-            color: #a0a0a0;
+          font-size: 12px;
+          color: #a0a0a0;
         }
         .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
+          display: flex;
+          gap: 12px;
+          margin-top: 10px;
         }
         .btn-modal-save {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            background: #4169e1;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
+          flex: 1;
+          padding: 10px;
+          border: none;
+          border-radius: 6px;
+          background: #4169e1;
+          color: white;
+          font-weight: bold;
+          cursor: pointer;
+          transition: 0.2s;
         }
         .btn-modal-save:hover:not(:disabled) {
-            box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
+          box-shadow: 0 5px 15px rgba(65, 105, 225, 0.4);
         }
         .btn-modal-save:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+          opacity: 0.6;
+          cursor: not-allowed;
         }
         .btn-modal-close {
-            padding: 10px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            background: transparent;
-            color: #e6e6e6;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
+          padding: 10px 16px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 6px;
+          background: transparent;
+          color: #e6e6e6;
+          cursor: pointer;
+          font-weight: bold;
+          transition: 0.2s;
         }
         .btn-modal-close:hover {
-            background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.1);
         }
         .modal-info-group input,
         .modal-info-group select {
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(0, 0, 0, 0.25);
-            color: #e6e6e6;
-            outline: none;
-            width: 100%;
+          padding: 10px;
+          border-radius: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(0, 0, 0, 0.25);
+          color: #e6e6e6;
+          outline: none;
+          width: 100%;
         }
         .modal-info-group select option {
-            background-color: #101a33;
-            color: #e6e6e6;
+          background-color: #101a33;
+          color: #e6e6e6;
         }
       `}</style>
 

@@ -5,13 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 
 export const PlanModal = ({ isOpen, onClose }) => {
-  const { client, login } = useAuth();
-  const navigate = useNavigate();
-
   const [name, setName] = useState("");
   const [documentId, setDocumentId] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { client, login } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (client) {
@@ -26,7 +26,10 @@ export const PlanModal = ({ isOpen, onClose }) => {
   }
 
   const formatCurrency = (value) => {
-    if (value === undefined || value === null) return "R$ 0,00";
+    if (value == undefined || value == null) {
+      return "R$ 0,00";
+    }
+
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -142,7 +145,7 @@ export const PlanModal = ({ isOpen, onClose }) => {
             <div className="modal-info-group">
               <label>Tipo de Plano</label>
               <span
-                className={`plan-badge ${client?.plan_type === "prepaid" ? "prepaid" : "postpaid"}`}
+                className={`plan-badge ${client?.plan_type == "prepaid" ? "prepaid" : "postpaid"}`}
               >
                 {client?.plan_type == "prepaid" ? "Pré-pago" : "Pós-pago"}
               </span>

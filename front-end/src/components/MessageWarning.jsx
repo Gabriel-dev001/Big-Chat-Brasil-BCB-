@@ -1,5 +1,7 @@
 export default function MessageWarning({ message }) {
-  if (!message) return null;
+  if (!message) {
+    return null;
+  }
 
   return (
     <>

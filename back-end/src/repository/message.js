@@ -28,6 +28,8 @@ class MessageRepository {
   }
 
   static async markRead(conversation_id, sender_id) {
+    await knex("conversation").where({ id: conversation_id }).update({ unread_count: 0 });
+
     return knex("message")
       .where({ conversation_id, sender_id })
       .where("status", "=", "delivered")

@@ -1,5 +1,7 @@
 export default function MessageError({ message }) {
-  if (!message) return null;
+  if (!message) {
+    return null;
+  }
 
   return (
     <>

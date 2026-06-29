@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import MessageError from "./MessageError";
 import { getClients } from "../services/client/api";
 import { useAuth } from "../auth/authContext";
+import { ChatWindow } from "./ChatWindow";
 
 export const ClientList = () => {
-  const { client } = useAuth();
-
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [messageError, setMessageError] = useState(null);
+  const [activeRecipient, setActiveRecipient] = useState(null);
+
+  const { client } = useAuth();
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -49,7 +51,6 @@ export const ClientList = () => {
           grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
           gap: 16px;
         }
-        /* Card inspirado na foto (estilo vidro/premium) */
         .client-card {
           position: relative;
           background: rgba(255, 255, 255, 0.04);
@@ -62,6 +63,7 @@ export const ClientList = () => {
           text-align: center;
           transition: all 0.2s ease;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          cursor: pointer;
         }
         .client-card:hover {
           transform: translateY(-2px);
@@ -69,7 +71,11 @@ export const ClientList = () => {
           border-color: rgba(65, 105, 225, 0.3);
           box-shadow: 0 4px 20px rgba(65, 105, 225, 0.15);
         }
-        /* Avatar com a primeira letra do nome */
+        .client-card.active {
+          border-color: rgba(65, 105, 225, 0.6);
+          background: rgba(65, 105, 225, 0.08);
+          box-shadow: 0 0 0 2px rgba(65,105,225,0.2), 0 4px 20px rgba(65,105,225,0.2);
+        }
         .client-avatar {
           width: 64px;
           height: 64px;
@@ -89,26 +95,10 @@ export const ClientList = () => {
           font-weight: bold;
           color: #e6e6e6;
           margin: 0 0 4px 0;
-          /* Corta o texto com '...' se o nome for gigante */
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
           width: 100%;
-        }
-        .client-plan-badge {
-          font-size: 11px;
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-weight: bold;
-          text-transform: uppercase;
-        }
-        .client-plan-badge.prepaid {
-          background: rgba(76, 175, 80, 0.12);
-          color: #4caf50;
-        }
-        .client-plan-badge.postpaid {
-          background: rgba(65, 105, 225, 0.12);
-          color: #4169e1;
         }
         .loading-text {
           color: #a0a0a0;
@@ -123,13 +113,20 @@ export const ClientList = () => {
       ) : (
         <div className="grid-clients">
           {clients
-            .filter((item) => item.id != client?.id)
+            .filter((item) => item.id !== client?.id)
             .map((item) => (
-              <div key={item.id} className="client-card">
+              <div
+                key={item.id}
+                className={`client-card ${activeRecipient?.id == item.id ? "active" : ""}`}
+                onClick={() =>
+                  setActiveRecipient(
+                    activeRecipient?.id == item.id ? null : item,
+                  )
+                }
+              >
                 <div className="client-avatar">
                   {item.name ? item.name.charAt(0).toUpperCase() : "?"}
                 </div>
-
                 <h3 className="client-name" title={item.name}>
                   {item.name}
                 </h3>
@@ -138,6 +135,13 @@ export const ClientList = () => {
 
           {messageError ? <MessageError message={messageError} /> : ""}
         </div>
+      )}
+
+      {activeRecipient && (
+        <ChatWindow
+          recipient={activeRecipient}
+          onClose={() => setActiveRecipient(null)}
+        />
       )}
     </div>
   );
