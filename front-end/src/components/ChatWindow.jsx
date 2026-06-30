@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   getConversationByClientRecipient,
   getMessagesByConversation,
@@ -6,6 +6,26 @@ import {
   markMessagesRead,
 } from "../services/message/api";
 import { useAuth } from "../auth/authContext";
+
+function highlightText(text, term) {
+  if (!term.trim()) {
+    return text;
+  }
+
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escaped})`, "gi");
+  const parts = text.split(regex);
+
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="cw-highlight">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+}
 
 export const ChatWindow = ({ recipient, onClose }) => {
   const [conversation, setConversation] = useState(null);
@@ -15,12 +35,15 @@ export const ChatWindow = ({ recipient, onClose }) => {
   const [loadingConv, setLoadingConv] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const { client } = useAuth();
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
   const conversationRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     if (!recipient) return;
@@ -49,13 +72,16 @@ export const ChatWindow = ({ recipient, onClose }) => {
 
         if (!msgData?.error && msgData?.messages) {
           const visible = msgData.messages.filter(
-            (m) => m.status == "delivered" || m.status == "read",
+            (message) =>
+              message.status == "delivered" || message.status == "read",
           );
 
           setMessages(visible);
 
           const hasUnread = visible.some(
-            (m) => m.sender_id == recipient.id && m.status == "delivered",
+            (message) =>
+              message.sender_id == recipient.id &&
+              message.status == "delivered",
           );
 
           if (hasUnread) {
@@ -76,7 +102,10 @@ export const ChatWindow = ({ recipient, onClose }) => {
     init();
 
     const interval = setInterval(async () => {
-      if (!conversationRef.current) return;
+      if (!conversationRef.current) {
+        return;
+      }
+
       try {
         const { data: msgData } = await getMessagesByConversation(
           conversationRef.current.id,
@@ -84,8 +113,10 @@ export const ChatWindow = ({ recipient, onClose }) => {
 
         if (!msgData?.error && msgData?.messages) {
           const visible = msgData.messages.filter(
-            (m) => m.status == "delivered" || m.status == "read",
+            (message) =>
+              message.status == "delivered" || message.status == "read",
           );
+
           setMessages(visible);
         }
       } catch (err) {
@@ -99,19 +130,43 @@ export const ChatWindow = ({ recipient, onClose }) => {
   }, [recipient]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (!searchTerm) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, searchTerm]);
 
-  const handleSend = async () => {
-    const trimmed = content.trim();
-    if (!trimmed || !conversation || sending) {
-      return;
+  useEffect(() => {
+    if (isSearchOpen) {
+      searchInputRef.current?.focus();
+    } else {
+      setSearchTerm("");
+    }
+  }, [isSearchOpen]);
+
+  const filteredMessages = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return messages;
     }
 
-    setSending(true);
-    setError(null);
+    const lower = searchTerm.toLowerCase();
 
+    return messages.filter((m) => m.content.toLowerCase().includes(lower));
+  }, [messages, searchTerm]);
+
+  const matchCount = filteredMessages.length;
+  const isFiltering = searchTerm.trim().length > 0;
+
+  const handleSend = async () => {
     try {
+      const trimmed = content.trim();
+
+      if (!trimmed || !conversation || sending) {
+        return;
+      }
+
+      setSending(true);
+      setError(null);
+
       const { data } = await sendMessage({
         conversation_id: conversation.id,
         sender_id: client.id,
@@ -126,7 +181,9 @@ export const ChatWindow = ({ recipient, onClose }) => {
       }
 
       setMessages((prev) => [...prev, { ...data.message, _optimistic: true }]);
+
       setContent("");
+
       textareaRef.current?.focus();
     } catch (error) {
       console.error(error);
@@ -140,6 +197,12 @@ export const ChatWindow = ({ recipient, onClose }) => {
     if (e.key == "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Escape") {
+      setIsSearchOpen(false);
     }
   };
 
@@ -273,6 +336,34 @@ export const ChatWindow = ({ recipient, onClose }) => {
         .cw-priority-value.urgent {
           color: #ff9800;
         }
+        .cw-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          flex-shrink: 0;
+        }
+        .cw-icon-btn {
+          background: none;
+          border: none;
+          color: #94a3b8;
+          font-size: 16px;
+          cursor: pointer;
+          line-height: 1;
+          padding: 5px;
+          border-radius: 6px;
+          transition: color 0.15s, background 0.15s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .cw-icon-btn:hover {
+          color: #fff;
+          background: rgba(255,255,255,0.08);
+        }
+        .cw-icon-btn.active {
+          color: #4169e1;
+          background: rgba(65,105,225,0.15);
+        }
         .cw-close {
           background: none;
           border: none;
@@ -288,6 +379,45 @@ export const ChatWindow = ({ recipient, onClose }) => {
         .cw-close:hover {
           color: #fff;
           background: rgba(255,255,255,0.08);
+        }
+        .cw-search-bar {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 14px;
+          background: rgba(255,255,255,0.03);
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+          flex-shrink: 0;
+          animation: cw-fade-in 0.15s ease;
+        }
+        @keyframes cw-fade-in {
+          from { opacity: 0; transform: translateY(-4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .cw-search-input {
+          flex: 1;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          padding: 6px 10px;
+          color: #e2e8f0;
+          font-size: 12px;
+          font-family: sans-serif;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        .cw-search-input::placeholder { color: #475569; }
+        .cw-search-input:focus {
+          border-color: rgba(65,105,225,0.5);
+        }
+        .cw-search-count {
+          font-size: 11px;
+          color: #64748b;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .cw-search-count.has-results {
+          color: #4169e1;
         }
         .cw-body {
           flex: 1;
@@ -327,7 +457,8 @@ export const ChatWindow = ({ recipient, onClose }) => {
           line-height: 1.45;
           white-space: pre-wrap;
           overflow-wrap: break-word;
-          word-break: normal;
+          word-break: break-word;   
+          width: fit-content;
         }
         .cw-bubble-row.mine .cw-bubble {
           background: rgba(65,105,225,0.28);
@@ -340,6 +471,16 @@ export const ChatWindow = ({ recipient, onClose }) => {
           border: 1px solid rgba(255,255,255,0.09);
           color: #cbd5e1;
           border-bottom-left-radius: 4px;
+        }
+        .cw-highlight {
+          background: rgba(255, 214, 0, 0.35);
+          color: #ffe066;
+          border-radius: 2px;
+          padding: 0 1px;
+          font-style: normal;
+        }
+        .cw-bubble-row.has-match .cw-bubble {
+          outline: 1px solid rgba(255, 214, 0, 0.3);
         }
         .cw-bubble-meta {
           font-size: 10px;
@@ -456,30 +597,74 @@ export const ChatWindow = ({ recipient, onClose }) => {
             </div>
           </div>
 
-          <button className="cw-close" onClick={onClose} title="Fechar">
-            ✕
-          </button>
+          <div className="cw-header-actions">
+            <button
+              className={`cw-icon-btn ${isSearchOpen ? "active" : ""}`}
+              onClick={() => setIsSearchOpen((v) => !v)}
+              title={isSearchOpen ? "Fechar busca" : "Buscar mensagens"}
+            >
+              Pesquisar
+            </button>
+
+            <button className="cw-close" onClick={onClose} title="Fechar">
+              ✕
+            </button>
+          </div>
         </div>
+
+        {isSearchOpen && (
+          <div className="cw-search-bar">
+            <input
+              ref={searchInputRef}
+              className="cw-search-input"
+              type="text"
+              placeholder="Buscar nas mensagens…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+            />
+            {isFiltering && (
+              <span
+                className={`cw-search-count ${matchCount > 0 ? "has-results" : ""}`}
+              >
+                {matchCount === 0
+                  ? "Nenhum resultado"
+                  : `${matchCount} resultado${matchCount > 1 ? "s" : ""}`}
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="cw-body">
           {loadingConv ? (
             <div className="cw-state">Carregando conversa…</div>
           ) : error ? (
             <div className="cw-state">{error}</div>
-          ) : messages.length == 0 ? (
-            <div className="cw-state">Nenhuma mensagem ainda.</div>
+          ) : filteredMessages.length === 0 ? (
+            <div className="cw-state">
+              {isFiltering
+                ? `Nenhuma mensagem contém "${searchTerm}".`
+                : "Nenhuma mensagem ainda."}
+            </div>
           ) : (
-            messages.map((msg, i) => {
+            filteredMessages.map((msg, i) => {
               const isMine = msg.sender_id == client.id;
               const statusIcon = msg.status == "read" ? "✓✓" : "✓";
+              const hasMatch =
+                isFiltering &&
+                msg.content.toLowerCase().includes(searchTerm.toLowerCase());
 
               return (
                 <div
                   key={msg.id ?? `opt-${i}`}
-                  className={`cw-bubble-row ${isMine ? "mine" : "theirs"}`}
+                  className={`cw-bubble-row ${isMine ? "mine" : "theirs"} ${hasMatch ? "has-match" : ""}`}
                 >
                   <div>
-                    <div className="cw-bubble">{msg.content}</div>
+                    <div className="cw-bubble">
+                      {isFiltering
+                        ? highlightText(msg.content, searchTerm)
+                        : msg.content}
+                    </div>
                     <div className="cw-bubble-meta">
                       {msg.priority == "urgent" && (
                         <span className="cw-badge-urgent">URGENTE</span>
